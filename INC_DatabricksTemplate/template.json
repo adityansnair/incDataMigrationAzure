@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspaces_incDatabricksworkspace_name": {
+            "defaultValue": "incDatabricksworkspace",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Databricks/workspaces",
+            "apiVersion": "2018-04-01",
+            "name": "[parameters('workspaces_incDatabricksworkspace_name')]",
+            "location": "southeastasia",
+            "sku": {
+                "name": "standard"
+            },
+            "properties": {
+                "managedResourceGroupId": "[concat('/subscriptions/21d04da6-e2fc-4fd2-8f3d-d79ae32b26ca/resourceGroups/databricks-rg-', parameters('workspaces_incDatabricksworkspace_name'), '-vacxyh2bwre34')]",
+                "parameters": {
+                    "enableNoPublicIp": {
+                        "type": "Bool",
+                        "value": false
+                    },
+                    "prepareEncryption": {
+                        "type": "Bool",
+                        "value": false
+                    },
+                    "requireInfrastructureEncryption": {
+                        "type": "Bool",
+                        "value": false
+                    }
+                },
+                "authorizations": [
+                    {
+                        "principalId": "9a74af6f-d153-4348-988a-e2672920bee9",
+                        "roleDefinitionId": "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                    }
+                ],
+                "createdBy": {},
+                "updatedBy": {},
+                "createdDateTime": "2021-02-04T13:32:57.1721751Z"
+            }
+        }
+    ]
+}
