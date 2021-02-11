@@ -1,0 +1,745 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vulnerabilityAssessments_Default_storageContainerPath": {
+            "type": "SecureString"
+        },
+        "vaults_incKeyVault_name": {
+            "defaultValue": "incKeyVault",
+            "type": "String"
+        },
+        "servers_incsqlserver025_name": {
+            "defaultValue": "incsqlserver025",
+            "type": "String"
+        },
+        "workspaces_incDatabricksworkspace_name": {
+            "defaultValue": "incDatabricksworkspace",
+            "type": "String"
+        },
+        "storageAccounts_incstorageaccount025_name": {
+            "defaultValue": "incstorageaccount025",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Databricks/workspaces",
+            "apiVersion": "2018-04-01",
+            "name": "[parameters('workspaces_incDatabricksworkspace_name')]",
+            "location": "southeastasia",
+            "sku": {
+                "name": "standard"
+            },
+            "properties": {
+                "managedResourceGroupId": "[concat('/subscriptions/21d04da6-e2fc-4fd2-8f3d-d79ae32b26ca/resourceGroups/databricks-rg-', parameters('workspaces_incDatabricksworkspace_name'), '-vacxyh2bwre34')]",
+                "parameters": {
+                    "enableNoPublicIp": {
+                        "type": "Bool",
+                        "value": false
+                    },
+                    "prepareEncryption": {
+                        "type": "Bool",
+                        "value": false
+                    },
+                    "requireInfrastructureEncryption": {
+                        "type": "Bool",
+                        "value": false
+                    }
+                },
+                "authorizations": [
+                    {
+                        "principalId": "9a74af6f-d153-4348-988a-e2672920bee9",
+                        "roleDefinitionId": "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                    }
+                ],
+                "createdBy": {},
+                "updatedBy": {},
+                "createdDateTime": "2021-02-04T13:32:57.1721751Z"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2016-10-01",
+            "name": "[parameters('vaults_incKeyVault_name')]",
+            "location": "australiaeast",
+            "properties": {
+                "sku": {
+                    "family": "A",
+                    "name": "standard"
+                },
+                "tenantId": "ef7a487a-77ca-410a-803d-e426b62a587f",
+                "accessPolicies": [
+                    {
+                        "tenantId": "ef7a487a-77ca-410a-803d-e426b62a587f",
+                        "objectId": "6b4fb3ea-afad-4015-8e83-48cdb197c8f0",
+                        "permissions": {
+                            "keys": [
+                                "get",
+                                "list",
+                                "update",
+                                "create",
+                                "import",
+                                "delete",
+                                "recover",
+                                "backup",
+                                "restore"
+                            ],
+                            "secrets": [
+                                "get",
+                                "list",
+                                "set",
+                                "delete",
+                                "recover",
+                                "backup",
+                                "restore"
+                            ],
+                            "certificates": [
+                                "get",
+                                "list",
+                                "update",
+                                "create",
+                                "import",
+                                "delete",
+                                "recover",
+                                "backup",
+                                "restore",
+                                "managecontacts",
+                                "manageissuers",
+                                "getissuers",
+                                "listissuers",
+                                "setissuers",
+                                "deleteissuers"
+                            ]
+                        }
+                    },
+                    {
+                        "tenantId": "ef7a487a-77ca-410a-803d-e426b62a587f",
+                        "objectId": "0f92c6a6-2c34-477f-8085-a6c85a195c94",
+                        "permissions": {
+                            "secrets": [
+                                "get",
+                                "list"
+                            ]
+                        }
+                    }
+                ],
+                "enabledForDeployment": false,
+                "enabledForDiskEncryption": false,
+                "enabledForTemplateDeployment": false,
+                "enableSoftDelete": true
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2019-06-01-preview",
+            "name": "[parameters('servers_incsqlserver025_name')]",
+            "location": "australiaeast",
+            "kind": "v12.0",
+            "properties": {
+                "administratorLogin": "incadmin",
+                "version": "12.0",
+                "publicNetworkAccess": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[parameters('storageAccounts_incstorageaccount025_name')]",
+            "location": "australiaeast",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": true,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/CreateIndex')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/DbParameterization')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/DefragmentIndex')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/DropIndex')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/ForceLastGoodPlan')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/auditingPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/Default')]",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "auditingState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/auditingSettings",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "auditActionsAndGroups": [],
+                "isStorageSecondaryKeyInUse": false,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB')]",
+            "location": "australiaeast",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "sku": {
+                "name": "Basic",
+                "tier": "Basic",
+                "capacity": 5
+            },
+            "kind": "v12.0,user",
+            "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": 104857600,
+                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "zoneRedundant": false,
+                "readScale": "Disabled",
+                "storageAccountType": "GRS",
+                "maintenanceConfigurationId": "/subscriptions/21d04da6-e2fc-4fd2-8f3d-d79ae32b26ca/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/master/Default')]",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "auditingState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingSettings",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/extendedAuditingSettings",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/geoBackupPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/master/Default')]",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/securityAlertPolicies",
+            "apiVersion": "2020-02-02-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/master/current')]",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "status": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/vulnerabilityAssessments",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/master/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "recurringScans": {
+                    "isEnabled": false,
+                    "emailSubscriptionAdmins": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/encryptionProtector",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "kind": "servicemanaged",
+            "properties": {
+                "serverKeyName": "ServiceManaged",
+                "serverKeyType": "ServiceManaged"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/extendedAuditingSettings",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "auditActionsAndGroups": [],
+                "isStorageSecondaryKeyInUse": false,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/ClientIPAddress_2021-2-11_0-43-51')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "20.43.128.192",
+                "endIpAddress": "20.43.128.192"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/ClientIPAddress_2021-2-11_0-43-7')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "203.219.245.21",
+                "endIpAddress": "203.219.245.21"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/ClientIPAddress_2021-2-11_0-49-14')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "20.37.193.43",
+                "endIpAddress": "20.37.193.43"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/keys",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/ServiceManaged')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "kind": "servicemanaged",
+            "properties": {
+                "serverKeyType": "ServiceManaged"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/securityAlertPolicies",
+            "apiVersion": "2020-02-02-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/vulnerabilityAssessments",
+            "apiVersion": "2018-06-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "recurringScans": {
+                    "isEnabled": false,
+                    "emailSubscriptionAdmins": true
+                },
+                "storageContainerPath": "[parameters('vulnerabilityAssessments_Default_storageContainerPath')]"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_incstorageaccount025_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_incstorageaccount025_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_incstorageaccount025_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_incstorageaccount025_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "protocolSettings": {
+                    "smb": {}
+                },
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_incstorageaccount025_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_incstorageaccount025_name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_incstorageaccount025_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_incstorageaccount025_name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/CreateIndex')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/DbParameterization')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/DefragmentIndex')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/DropIndex')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/ForceLastGoodPlan')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/Default')]",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "auditingState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/auditingSettings",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "weeklyRetention": "PT0S",
+                "monthlyRetention": "PT0S",
+                "yearlyRetention": "PT0S",
+                "weekOfYear": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies",
+            "apiVersion": "2017-10-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 7
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/extendedAuditingSettings",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 0,
+                "isAzureMonitorTargetEnabled": false,
+                "state": "Disabled",
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/geoBackupPolicies",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/Default')]",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "state": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/securityAlertPolicies",
+            "apiVersion": "2020-02-02-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/current')]",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "status": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/vulnerabilityAssessments",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(parameters('servers_incsqlserver025_name'), '/incSQLDB/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_incsqlserver025_name'), 'incSQLDB')]",
+                "[resourceId('Microsoft.Sql/servers', parameters('servers_incsqlserver025_name'))]"
+            ],
+            "properties": {
+                "recurringScans": {
+                    "isEnabled": false,
+                    "emailSubscriptionAdmins": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_incstorageaccount025_name'), '/default/incdataset')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_incstorageaccount025_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_incstorageaccount025_name'))]"
+            ],
+            "properties": {
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "None"
+            }
+        }
+    ]
+}
