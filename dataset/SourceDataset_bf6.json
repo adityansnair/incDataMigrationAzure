@@ -1,0 +1,74 @@
+{
+	"name": "SourceDataset_bf6",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "rank",
+				"type": "nvarchar"
+			},
+			{
+				"name": "profile",
+				"type": "nvarchar"
+			},
+			{
+				"name": "name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "url",
+				"type": "nvarchar"
+			},
+			{
+				"name": "state",
+				"type": "nvarchar"
+			},
+			{
+				"name": "revenue",
+				"type": "nvarchar"
+			},
+			{
+				"name": "growth_%",
+				"type": "nvarchar"
+			},
+			{
+				"name": "industry",
+				"type": "nvarchar"
+			},
+			{
+				"name": "workers",
+				"type": "nvarchar"
+			},
+			{
+				"name": "previous_workers",
+				"type": "nvarchar"
+			},
+			{
+				"name": "founded",
+				"type": "nvarchar"
+			},
+			{
+				"name": "yrs_on_list",
+				"type": "nvarchar"
+			},
+			{
+				"name": "metro",
+				"type": "nvarchar"
+			},
+			{
+				"name": "city",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Azure Data Lake Storage Gen2 file"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

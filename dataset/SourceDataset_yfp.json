@@ -1,0 +1,81 @@
+{
+	"name": "SourceDataset_yfp",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "INC 5000 Companies 2019.csv",
+				"fileSystem": "incdataset"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "rank",
+				"type": "String"
+			},
+			{
+				"name": "profile",
+				"type": "String"
+			},
+			{
+				"name": "name",
+				"type": "String"
+			},
+			{
+				"name": "url",
+				"type": "String"
+			},
+			{
+				"name": "state",
+				"type": "String"
+			},
+			{
+				"name": "revenue",
+				"type": "String"
+			},
+			{
+				"name": "growth_%",
+				"type": "String"
+			},
+			{
+				"name": "industry",
+				"type": "String"
+			},
+			{
+				"name": "workers",
+				"type": "String"
+			},
+			{
+				"name": "previous_workers",
+				"type": "String"
+			},
+			{
+				"name": "founded",
+				"type": "String"
+			},
+			{
+				"name": "yrs_on_list",
+				"type": "String"
+			},
+			{
+				"name": "metro",
+				"type": "String"
+			},
+			{
+				"name": "city",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

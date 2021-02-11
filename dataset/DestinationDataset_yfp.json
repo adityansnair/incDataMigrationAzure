@@ -1,0 +1,16 @@
+{
+	"name": "DestinationDataset_yfp",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"table": "Azure Data Lake Storage Gen2 file"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
